@@ -67,7 +67,8 @@ void quickSort(int arr[], int low, int high) {
 
 int main(int argc, char **argv) {
     char opt;
-    int n, quiet = 0;
+    int n = 0;
+    bool quiet = true;
     int *arr;
 
 

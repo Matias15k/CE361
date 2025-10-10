@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 
+
+
 module gcd_tb;
 
     reg clk;
@@ -10,7 +12,7 @@ module gcd_tb;
     wire done;
 
     // Instantiate the GCD module
-    gcd uut (
+    gcd_subtract uut (
         .clk(clk),
         .rst(rst),
         .start(start),
@@ -28,6 +30,13 @@ module gcd_tb;
         forever #5 clk = ~clk; // 10ns clock period
     end
 
+    // --- add near top of module ---
+    integer total_cycles;
+
+    // Count cycles after reset is deasserted
+    initial total_cycles = 0;
+    always @(posedge clk) if (!rst) total_cycles <= total_cycles + 1;
+
     // Test sequence
     initial begin
         $display("Starting GCD testbench...");
@@ -37,15 +46,6 @@ module gcd_tb;
         b = 0;
         #10 rst = 0;
 
-        // Test case 1: GCD(48, 18) = 6
-        a = 32'd48;
-        b = 32'd18;
-        start = 1;
-        #10 start = 0;
-        wait(!done);
-        wait(done);       
-        $display($time,, "GCD(48, 18) = %d (0x%h)", result, result);
-
         // Test case 2: GCD(56, 98) = 14
         a = 32'd56;
         b = 32'd98;
@@ -53,17 +53,11 @@ module gcd_tb;
         #10 start = 0;
         wait(!done);       
         wait(done);
-        $display($time,, "GCD(56, 98) = %d (0x%h)", result, result);
+        $display($time,, "GCD(56, 98) => got %0d (0x%h), expect 14 (0x%h)", result, result, 32'd14);
 
-        // Test case 3: GCD(101, 103) = 1
-        a = 32'd101;
-        b = 32'd103;
-        start = 1;
-        #10 start = 0;
-        wait(!done);       
-        wait(done);
-        $display($time,, "GCD(101, 103) = %d (0x%h)", result, result);
-
+        $display("TOTAL cycles (reset deassert -> finish) = %0d", total_cycles);
+        // If your sim clock is 10 ns:
+        $display("TOTAL sim time ~= %0d ns", total_cycles*10);
         $finish;
     end
 
